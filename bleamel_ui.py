@@ -1,14 +1,14 @@
 import streamlit as st
-from langchain_community import chat_models
 
-import chatbot
+import chatbot_factory
+import chatbot_protocol
 
 
 @st.cache_resource
-def get_chatbot() -> chatbot.Chatbot:
+def get_chatbot() -> chatbot_protocol.ChatbotProtocol:
     if 'chatbot' not in st.session_state:
-        chat_model = chat_models.ChatOllama(model='llama3:instruct')
-        st.session_state.chatbot = chatbot.Chatbot.from_chat_model(chat_model)
+        bot = chatbot_factory.FlowerChatbotFactory.create_basic_chatbot()
+        st.session_state.chatbot = bot
     return st.session_state.chatbot
 
 
