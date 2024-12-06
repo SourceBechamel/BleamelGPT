@@ -2,10 +2,10 @@ import typing
 from typing import Iterable
 
 import pydantic
-from langchain import memory, schema
+from langchain import schema, prompts
 from langchain.prompts import chat
 from langchain.schema import runnable
-from langchain_core import language_models
+from langchain_core import language_models, chat_history
 
 
 class ChatChainInput(typing.TypedDict):
@@ -13,9 +13,9 @@ class ChatChainInput(typing.TypedDict):
     question: str
 
 
-class Chatbot(pydantic.v1.BaseModel):
-    chain: runnable.RunnableSequence[ChatChainInput, str]
-    history: memory.ChatMessageHistory
+class Chatbot(pydantic.BaseModel, arbitrary_types_allowed=True):
+    chain: runnable.Runnable[ChatChainInput, str]
+    history: chat_history.InMemoryChatMessageHistory
 
     @property
     def messages(self) -> typing.List[schema.BaseMessage]:
@@ -42,13 +42,18 @@ class Chatbot(pydantic.v1.BaseModel):
         self.history.add_ai_message(answer)
 
     @classmethod
-    def from_chat_model(cls, chat_model: language_models.BaseChatModel,
-                        history: memory.ChatMessageHistory | None = None):
+    def from_chat_model(cls,
+                        chat_model: language_models.BaseChatModel,
+                        system_message: str | schema.SystemMessage | prompts.SystemMessagePromptTemplate):
         template = chat.ChatPromptTemplate.from_messages([
+            schema.SystemMessage(content=system_message) if isinstance(system_message, str) else system_message,
             chat.MessagesPlaceholder('history'),
             chat.HumanMessagePromptTemplate.from_template('{question}')
         ])
+
+        history = chat_history.InMemoryChatMessageHistory()
+
         return cls(
             chain=template | chat_model | schema.StrOutputParser(),
-            history=history or memory.ChatMessageHistory()
+            history=history
         )
