@@ -1,6 +1,6 @@
 import langchain_ollama
 
-import chatbot
+from bleamel.chatbots import chatbot
 
 
 class FlowerChatbotFactory:

@@ -1,13 +1,12 @@
 import streamlit as st
 
-import chatbot_factory
-import chatbot_protocol
+from bleamel.chatbots import factory, protocol
 
 
 @st.cache_resource
-def get_chatbot() -> chatbot_protocol.ChatbotProtocol:
+def get_chatbot() -> protocol.ChatbotProtocol:
     if 'chatbot' not in st.session_state:
-        bot = chatbot_factory.FlowerChatbotFactory.create_basic_chatbot()
+        bot = factory.FlowerChatbotFactory.create_basic_chatbot()
         st.session_state.chatbot = bot
     return st.session_state.chatbot
 

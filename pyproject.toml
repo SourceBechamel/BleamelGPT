@@ -1,0 +1,7 @@
+[project]
+name = "bleamel"
+version = "0.0.1"
+requires-python = ">=3.11"
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
